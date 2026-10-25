@@ -1,0 +1,26 @@
+name: dosya_programi
+description: Is takip uygulamasi (musteri, makina, mazot, gider).
+publish_to: 'none'
+version: 2.1.0+10
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  path_provider: ^2.1.4
+  image_picker: ^1.1.2
+  pdf: ^3.11.1
+  share_plus: ^11.0.0
+  url_launcher: ^6.3.1
+  file_selector: ^1.0.3
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/data.json
+    - assets/excel_data.json
+    - assets/logo.png
+    - assets/fonts/LiberationSans-Regular.ttf
+    - assets/fonts/LiberationSans-Bold.ttf
