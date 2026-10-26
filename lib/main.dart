@@ -578,10 +578,11 @@ class App extends StatelessWidget {
           builder: (context, child) {
             darkMode = Theme.of(context).brightness == Brightness.dark;
             return LockGate(
-                child: LayoutBuilder(
-                    builder: (c, cons) => cons.maxWidth > 760
-                        ? Container(color: const Color(0xFFD1D5DB), child: Align(alignment: Alignment.topCenter, child: SizedBox(width: 720, height: double.infinity, child: child ?? const SizedBox())))
-                        : (child ?? const SizedBox())));
+                child: LayoutBuilder(builder: (c, cons) {
+              final w = S.ayar['pencere'] == 'dar' ? 560.0 : (S.ayar['pencere'] == 'orta' ? 1000.0 : 0.0);
+              if (cons.maxWidth <= 760 || w == 0 || cons.maxWidth <= w) return child ?? const SizedBox();
+              return Container(color: const Color(0xFFD1D5DB), child: Align(alignment: Alignment.topCenter, child: SizedBox(width: w, height: double.infinity, child: child ?? const SizedBox())));
+            }));
           },
           home: const Home(),
         ),
@@ -686,7 +687,9 @@ class _HomeState extends State<Home> {
                 top: false,
                 child: SizedBox(
                   height: 62,
-                  child: ListView.builder(
+                  child: LayoutBuilder(builder: (c0, cons) {
+                    final itemW = cons.maxWidth >= items.length * 76 ? cons.maxWidth / items.length : 76.0;
+                    return ListView.builder(
                     scrollDirection: Axis.horizontal,
                     itemCount: items.length,
                     itemBuilder: (c, k) {
@@ -696,7 +699,7 @@ class _HomeState extends State<Home> {
                       return InkWell(
                         onTap: () => setState(() => i = k),
                         child: SizedBox(
-                          width: 76,
+                          width: itemW,
                           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                             Badge(isLabelVisible: cnt > 0, label: Text('$cnt'), child: Icon(on ? it[1] as IconData : it[0] as IconData, color: on ? inkNavy : grey)),
                             const SizedBox(height: 3),
@@ -706,7 +709,8 @@ class _HomeState extends State<Home> {
                         ),
                       );
                     },
-                  ),
+                  );
+                  }),
                 ),
               ),
             );
@@ -2654,7 +2658,7 @@ class OzetTab extends StatelessWidget {
         final ms = S.makinaStat(m).where((s) => s.active).toList();
         final borclu = (S.cust.values.where((s) => s.kalan > 0.5).toList()..sort((a, b) => b.kalan.compareTo(a.kalan))).take(5).toList();
         return Scaffold(
-          appBar: AppBar(title: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('Özet ve Analiz'), Text('Sürüm 11 · 2.1.0+10 · ${Nat.ad}', style: const TextStyle(fontSize: 10.5, color: Colors.white70, fontWeight: FontWeight.w400))]), actions: [
+          appBar: AppBar(title: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('Özet ve Analiz'), Text('Sürüm 12 · 2.2.0+11 · ${Nat.ad}', style: const TextStyle(fontSize: 10.5, color: Colors.white70, fontWeight: FontWeight.w400))]), actions: [
             const AyDrop(),
             PopupMenuButton<String>(
               onSelected: (v) => _menu(c, v),
@@ -2673,13 +2677,10 @@ class OzetTab extends StatelessWidget {
             bakimBanner(),
             alacakBanner(),
             uyariBannerlari(),
-            GridView.count(
+            GridView(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 2,
-              mainAxisSpacing: 10,
-              crossAxisSpacing: 10,
-              childAspectRatio: 1.7,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: (MediaQuery.of(c).size.width ~/ 320).clamp(2, 6), mainAxisSpacing: 10, crossAxisSpacing: 10, mainAxisExtent: 100),
               children: [
                 StatCard('Toplam iş (borç)', tl(borcT), icon: Icons.work_outline),
                 StatCard('Alınan', tl(alinan), color: green, icon: Icons.south_west),
@@ -3121,6 +3122,21 @@ class _AyarState extends State<AyarPage> {
                   setState(() {});
                 }),
         ]),
+        if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) ...[
+          const SizedBox(height: 8),
+          const Text('Pencere düzeni (bilgisayar)', style: TextStyle(fontWeight: FontWeight.w700)),
+          Wrap(spacing: 8, children: [
+            for (final e in const [['tam', 'Tam ekran'], ['orta', 'Geniş'], ['dar', 'Dar (telefon gibi)']])
+              ChoiceChip(
+                  label: Text(e[1]),
+                  selected: (S.ayar['pencere'] ?? 'tam') == e[0],
+                  onSelected: (_) {
+                    S.ayar['pencere'] = e[0];
+                    S.commit();
+                    setState(() {});
+                  }),
+          ]),
+        ],
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
           title: const Text('Telefon bildirimleri'),
