@@ -23,6 +23,7 @@ jobs:
           cp windows_icon/app_icon.ico build_win/windows/runner/resources/app_icon.ico
           sed -i 's/set(BINARY_NAME "dosya_programi")/set(BINARY_NAME "IsTakip")/' build_win/windows/CMakeLists.txt
           sed -i 's/L"dosya_programi"/L"Is Takip"/' build_win/windows/runner/main.cpp
+          sed -i 's/SW_SHOWNORMAL/SW_SHOWMAXIMIZED/' build_win/windows/runner/win32_window.cpp
           cd build_win
           flutter pub get
           flutter build windows --release
@@ -39,6 +40,7 @@ jobs:
           cp windows_icon/app_icon.ico build_win/windows/runner/resources/app_icon.ico
           sed -i 's/set(BINARY_NAME "dosya_programi")/set(BINARY_NAME "IsTakip")/' build_win/windows/CMakeLists.txt
           sed -i 's/L"dosya_programi"/L"Is Takip"/' build_win/windows/runner/main.cpp
+          sed -i 's/SW_SHOWNORMAL/SW_SHOWMAXIMIZED/' build_win/windows/runner/win32_window.cpp
           cd build_win
           flutter pub get
           flutter build windows --release
