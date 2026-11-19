@@ -349,7 +349,22 @@ class Store extends ChangeNotifier {
   }
 
   Future<void> reset() => loadFrom('assets/excel_data.json');
-  Future<void> clearAll() => loadFrom('assets/data.json');
+  // Tüm verileri sil: kayıtlar, müşteriler, makinalar, bakım, personel, çek ve fotoğraflar silinir; ayarlar (logo, PIN, firma adı) kalır
+  Future<void> clearAll() async {
+    final a = Map<String, String>.from(ayar);
+    _parse('{"isler":[],"giderler":[],"mazot":[],"musteriler":[],"makinalar":[]}');
+    if (a.isNotEmpty) ayar = a;
+    try {
+      final logo = (a['logo'] ?? '').split(RegExp(r'[\\/]')).last;
+      final d = Directory('$docsDir/fotolar');
+      if (d.existsSync()) {
+        for (final f in d.listSync()) {
+          if (f is File && f.path.split(RegExp(r'[\\/]')).last != logo) f.deleteSync();
+        }
+      }
+    } catch (_) {}
+    commit();
+  }
 
   bool restore(String raw) {
     try {
@@ -2658,7 +2673,7 @@ class OzetTab extends StatelessWidget {
         final ms = S.makinaStat(m).where((s) => s.active).toList();
         final borclu = (S.cust.values.where((s) => s.kalan > 0.5).toList()..sort((a, b) => b.kalan.compareTo(a.kalan))).take(5).toList();
         return Scaffold(
-          appBar: AppBar(title: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('Özet ve Analiz'), Text('Sürüm 12 · 2.2.0+11 · ${Nat.ad}', style: const TextStyle(fontSize: 10.5, color: Colors.white70, fontWeight: FontWeight.w400))]), actions: [
+          appBar: AppBar(title: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('Özet ve Analiz'), Text('Sürüm 13 · 2.2.1+12 · ${Nat.ad}', style: const TextStyle(fontSize: 10.5, color: Colors.white70, fontWeight: FontWeight.w400))]), actions: [
             const AyDrop(),
             PopupMenuButton<String>(
               onSelected: (v) => _menu(c, v),
@@ -2668,7 +2683,6 @@ class OzetTab extends StatelessWidget {
                 PopupMenuItem(value: 'r', child: Text('Panodaki yedeği geri yükle')),
                 PopupMenuItem(value: 'f', child: Text('Yedeği dosya olarak paylaş')),
                 PopupMenuItem(value: 'd', child: Text('Yedeği dosyadan yükle')),
-                PopupMenuItem(value: 'x', child: Text('Excel verisini yükle (örnek)')),
                 PopupMenuItem(value: 'e', child: Text('Tüm verileri sil (boş başla)')),
               ],
             ),
